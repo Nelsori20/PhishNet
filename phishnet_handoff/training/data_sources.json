@@ -1,0 +1,13 @@
+{
+  "schema_version":"0.2",
+  "last_reviewed":"2026-11-20",
+  "sources":[
+    {"id":"uci-sms","title":"UCI SMS Spam Collection","url":"https://archive.ics.uci.edu/dataset/228/sms+spam+collection","count":5574,"license":"CC BY 4.0","access":"open download; not yet downloaded","usable_for":"historical SMS spam/ham text baseline","not_usable_for":"payment authorization or multi-agent safety ground truth","state":"train script ready, NOT trained"},
+    {"id":"scambench","title":"SCAMBENCH","url":"https://huggingface.co/datasets/Shouninger/ScamBench","count":3670,"license":"CC BY-NC 4.0","access":"gated; click through agreement","usable_for":"noncommercial scam persuasion and robust text detector experiments","not_usable_for":"commercial fine-tuning without separate permissions; agent financial ground truth","state":"not downloaded or trained"},
+    {"id":"swechat","title":"SWE-chat","url":"https://github.com/SALT-NLP/SWE-chat","count":17819,"license":"review original terms","access":"gated HF data access","usable_for":"real coding agent interaction schemas","not_usable_for":"direct scam/payment truth labels","state":"not downloaded"},
+    {"id":"agentdojo","title":"AgentDojo","url":"https://github.com/ethz-spylab/agentdojo","license":"review per-repository license","access":"public code and scenarios","usable_for":"adversarial agent workflow evaluation","not_usable_for":"proof of live financial theft","state":"not ingested"},
+    {"id":"asb","title":"Agent Security Bench","url":"https://github.com/agiresearch/ASB","license":"review per-repository terms","access":"public research repo","usable_for":"agent safety benchmark evaluation","not_usable_for":"real-world fraudulent transfer label","state":"not ingested"},
+    {"id":"datathon-2026","title":"Team PhishNet datathon","url":"Phish-Net-Official.pdf","count":215440,"license":"verify original CSV rights","access":"only report available; original CSV absent","usable_for":"historical page feature experiment and method","not_usable_for":"retraining from PDF","state":"raw dataset NOT supplied"},
+    {"id":"phreshphish","title":"PhreshPhish","url":"https://huggingface.co/datasets/phreshphish/phreshphish","license":"CC BY 4.0 (verify details)","access":"public HF; large download","usable_for":"phishing URL/page HTML model generalization","not_usable_for":"inter-agent social engineering truth labels","state":"not downloaded"}
+  ]
+}

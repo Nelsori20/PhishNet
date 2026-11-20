@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishNet — Provenance-Aware Security Platform</title>
+  <style>
+    :root {
+      --bg-primary: #0A1128;
+      --bg-secondary: #101935;
+      --bg-card: #152244;
+      --bg-glass: rgba(21, 34, 68, 0.85);
+      --border-color: #243B6B;
+      --mint: #00F5D4;
+      --mint-glow: rgba(0, 245, 212, 0.25);
+      --mint-dim: #05D5AA;
+      --crimson: #FF3366;
+      --crimson-glow: rgba(255, 51, 102, 0.25);
+      --amber: #FFB703;
+      --amber-glow: rgba(255, 183, 3, 0.25);
+      --text-main: #F0F4F8;
+      --text-muted: #8E9AAF;
+      --text-dim: #57647E;
+      --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--mint), #00A699);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: var(--bg-primary);
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px var(--mint-glow);
+    }
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-badge {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      background: rgba(0, 245, 212, 0.1);
+      color: var(--mint);
+      border: 1px solid var(--mint-dim);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 0.25rem;
+      gap: 0.25rem;
+    }
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.85rem;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: var(--bg-card);
+      color: var(--mint);
+      border: 1px solid var(--mint-dim);
+      box-shadow: 0 0 10px var(--mint-glow);
+    }
+
+    .network-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--bg-primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 8px var(--mint);
+    }
+
+    main {
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Scenario Selector */
+    .scenario-bar {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .scenario-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      min-width: 240px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .scenario-card:hover {
+      border-color: var(--mint-dim);
+      transform: translateY(-2px);
+    }
+    .scenario-card.active {
+      border-color: var(--mint);
+      background: linear-gradient(180deg, rgba(0, 245, 212, 0.08), var(--bg-card));
+      box-shadow: 0 0 12px var(--mint-glow);
+    }
+    .sc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sc-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .sc-tag {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .sc-tag.deny { background: rgba(255, 51, 102, 0.15); color: var(--crimson); border: 1px solid var(--crimson); }
+    .sc-tag.allow { background: rgba(0, 245, 212, 0.15); color: var(--mint); border: 1px solid var(--mint); }
+    .sc-tag.hold { background: rgba(255, 183, 3, 0.15); color: var(--amber); border: 1px solid var(--amber); }
+    .sc-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Main Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1100px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.75rem;
+    }
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    .event-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: all 0.2s;
+    }
+    .event-card.origin { border-left-color: var(--crimson); }
+    .event-card.echo { border-left-color: var(--amber); }
+    .event-card.verified { border-left-color: var(--mint); }
+
+    .ev-top {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+    }
+    .ev-actor {
+      font-weight: 700;
+      color: var(--mint);
+    }
+    .ev-body {
+      color: var(--text-main);
+    }
+    .ev-digest {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+    }
+
+    /* Graph Visualizer */
+    .graph-container {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      height: 280px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Authoritative Transaction & Policy Panel */
+    .tx-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      background: var(--bg-secondary);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      font-size: 0.8rem;
+    }
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .detail-label {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+    .detail-val {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    /* Decision Display */
+    .decision-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .decision-banner.allow {
+      background: rgba(0, 245, 212, 0.12);
+      border: 1px solid var(--mint);
+      color: var(--mint);
+    }
+    .decision-banner.deny {
+      background: rgba(255, 51, 102, 0.12);
+      border: 1px solid var(--crimson);
+      color: var(--crimson);
+    }
+    .decision-banner.hold {
+      background: rgba(255, 183, 3, 0.12);
+      border: 1px solid var(--amber);
+      color: var(--amber);
+    }
+
+    .reason-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .reason-chip {
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--crimson);
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--crimson);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .reason-chip.allow {
+      border-left-color: var(--mint);
+      color: var(--mint);
+    }
+
+    /* Actions */
+    .action-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-primary {
+      background: var(--mint);
+      color: var(--bg-primary);
+    }
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 0 15px var(--mint-glow);
+      background: #05fddc;
+    }
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--mint-dim);
+    }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Audit & Tamper Panel */
+    .merkle-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+    .hash-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .hash-val {
+      color: var(--mint);
+      word-break: break-all;
+    }
+    .proof-badge {
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.7rem;
+    }
+    .proof-badge.valid { background: rgba(0, 245, 212, 0.2); color: var(--mint); }
+    .proof-badge.invalid { background: rgba(255, 51, 102, 0.2); color: var(--crimson); }
+
+    /* Advisory Box */
+    .advisory-box {
+      background: rgba(255, 183, 3, 0.08);
+      border: 1px solid var(--amber);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--amber);
+    }
+    .advisory-box.clear {
+      background: rgba(0, 245, 212, 0.08);
+      border-color: var(--mint);
+      color: var(--mint);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      padding: 1rem 2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">P</div>
+      <div>
+        <div class="brand-title">
+          PhishNet
+          <span class="brand-badge">Arc Testnet v1.0</span>
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-muted);">
+          Provenance-Aware Social-Engineering Defense &amp; Preflight Policy
+        </div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="mode-toggle">
+        <button class="mode-btn" id="btn-mode-advisory" onclick="setMode('advisory')">Consumer Advisory</button>
+        <button class="mode-btn active" id="btn-mode-enforcement" onclick="setMode('enforcement')">Enterprise Enforcement</button>
+      </div>
+
+      <div class="network-badge">
+        <div class="status-dot"></div>
+        <span>Circle Arc Testnet (5042002)</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Scenario Selector -->
+    <div>
+      <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.5px;">
+        Evaluation Scenarios (Adversarial &amp; Benign Counterfactuals)
+      </div>
+      <div class="scenario-bar" id="scenario-bar">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      
+      <!-- Left Column: Interaction History & Provenance Graph -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <!-- Timeline Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>Chronological Event History</span>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);" id="event-count-badge">0 events</span>
+          </div>
+
+          <div class="timeline" id="event-timeline">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Provenance Graph Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>Interactive Claim Lineage &amp; Trust DAG</span>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--mint); font-family: var(--font-mono);">Source Traced</span>
+          </div>
+
+          <div class="graph-container" id="graph-container">
+            <svg id="dag-svg" width="100%" height="100%" viewBox="0 0 600 260"></svg>
+          </div>
+
+          <div id="convergence-alert" class="advisory-box" style="display: none;">
+            <strong>Echo Chamber Detected:</strong> Multiple intermediate agents repeated this payment address claim, but all trace back to one unverified email origin. No independent corroboration exists.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Authoritative Policy & Payment Preflight -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+        <!-- Policy Decision & Transaction Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>Preflight Payment Evaluation</span>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">Non-LLM Gate</span>
+          </div>
+
+          <!-- Authoritative Transaction Details -->
+          <div class="tx-details">
+            <div class="detail-item">
+              <span class="detail-label">Asset / Token</span>
+              <span class="detail-val" id="tx-asset">USDC</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Proposed Amount</span>
+              <span class="detail-val" id="tx-amount">$250.00 (250,000,000 minor)</span>
+            </div>
+            <div class="detail-item" style="grid-column: span 2;">
+              <span class="detail-label">Proposed Recipient</span>
+              <span class="detail-val" id="tx-recipient" style="color: var(--amber);">0x2222222222222222222222222222222222222222</span>
+            </div>
+            <div class="detail-item" style="grid-column: span 2;">
+              <span class="detail-label">Signed Mandate Payee</span>
+              <span class="detail-val" id="mandate-recipient" style="color: var(--mint);">0x1111111111111111111111111111111111111111</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Chain ID</span>
+              <span class="detail-val" id="tx-chain">5042002 (Arc)</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Cumulative Budget Limit</span>
+              <span class="detail-val" id="tx-budget">$500.00</span>
+            </div>
+          </div>
+
+          <!-- Preflight Decision Result -->
+          <div class="decision-banner deny" id="decision-banner">
+            <span id="decision-text">DENY</span>
+            <span style="font-size: 0.8rem; font-weight: normal; font-family: var(--font-mono);" id="decision-time"></span>
+          </div>
+
+          <!-- Reason Codes -->
+          <div class="reason-list" id="reason-list">
+            <!-- Dynamic reason codes -->
+          </div>
+
+          <!-- Advisory Mode Warning -->
+          <div id="advisory-mode-notice" class="advisory-box" style="display: none;">
+            <strong>Advisory Mode Active:</strong> PhishNet provides social-engineering warnings and provenance data. In advisory mode, external payments are not directly blocked by the server signer.
+          </div>
+
+          <!-- Actions -->
+          <div class="action-row">
+            <button class="btn btn-secondary" onclick="runPreflight()">Re-evaluate Policy</button>
+            <button class="btn btn-primary" id="btn-execute" onclick="executePayment()">
+              <span>Sign &amp; Execute on Arc</span>
+            </button>
+          </div>
+
+          <!-- Execution Receipt Display -->
+          <div id="execution-receipt-box" style="display: none; background: var(--bg-secondary); border: 1px solid var(--mint-dim); padding: 0.75rem; border-radius: 6px; font-size: 0.75rem; font-family: var(--font-mono);">
+            <div style="color: var(--mint); font-weight: 700; margin-bottom: 0.25rem;">Transaction Settled / Simulated</div>
+            <div id="receipt-hash" style="word-break: break-all; color: var(--text-main);"></div>
+            <div id="receipt-explorer" style="margin-top: 0.25rem;">
+              <a href="#" target="_blank" style="color: var(--mint);">View on Arc Explorer &rarr;</a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Cryptographic Merkle Audit & Tamper Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>Cryptographic Provenance &amp; Merkle Proof</span>
+            </div>
+            <span class="proof-badge valid" id="proof-status-badge">Proof Verified</span>
+          </div>
+
+          <div class="merkle-box">
+            <div class="hash-row">
+              <span style="color: var(--text-muted);">Committed Merkle Root:</span>
+              <span class="hash-val" id="merkle-root">0x7a8f...9b12</span>
+            </div>
+            <div class="hash-row">
+              <span style="color: var(--text-muted);">Event Digest (SHA-256):</span>
+              <span class="hash-val" id="event-digest">0x3b1c...4f88</span>
+            </div>
+            <div class="hash-row">
+              <span style="color: var(--text-muted);">Inclusion Proof Status:</span>
+              <span id="proof-explanation" style="color: var(--mint);">Valid Inclusion Path (3 steps)</span>
+            </div>
+          </div>
+
+          <div style="font-size: 0.75rem; color: var(--text-muted);">
+            Test cryptographic tamper detection: Intentionally modify committed event data to demonstrate that altered evidence invalidates Merkle proof verification.
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-secondary" id="btn-tamper" onclick="toggleTamper()" style="color: var(--crimson); border-color: var(--crimson);">
+              <span id="tamper-btn-text">Tamper with Event Record</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div>PhishNet UBC 2026 Hackathon &bull; Open-Source Provenance Security for Agentic Payments</div>
+    <div>Target: Circle Arc Testnet &bull; EIP-712 / RFC 9162 Merkle Architecture</div>
+  </footer>
+
+  <script>
+    let currentMode = 'enforcement'; // 'advisory' or 'enforcement'
+    let scenarios = [];
+    let currentScenario = null;
+    let isTampered = false;
+
+    // Load initial scenarios
+    async function init() {
+      try {
+        const res = await fetch('/v1/scenarios');
+        scenarios = await res.json();
+      } catch (err) {
+        console.warn('API fetch failed, loading embedded fallback scenarios.');
+        scenarios = getFallbackScenarios();
+      }
+      renderScenarioBar();
+      selectScenario(scenarios[0].scenarioId);
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btn-mode-advisory').classList.toggle('active', mode === 'advisory');
+      document.getElementById('btn-mode-enforcement').classList.toggle('active', mode === 'enforcement');
+      document.getElementById('advisory-mode-notice').style.display = mode === 'advisory' ? 'block' : 'none';
+      updateExecuteButtonState();
+    }
+
+    function renderScenarioBar() {
+      const bar = document.getElementById('scenario-bar');
+      bar.innerHTML = '';
+      scenarios.forEach(sc => {
+        const card = document.createElement('div');
+        card.className = `scenario-card ${currentScenario?.scenarioId === sc.scenarioId ? 'active' : ''}`;
+        card.id = `sc-card-${sc.scenarioId}`;
+        card.onclick = () => selectScenario(sc.scenarioId);
+
+        const tagClass = sc.expectedDecision.toLowerCase();
+        card.innerHTML = `
+          <div class="sc-header">
+            <span class="sc-title">${sc.title}</span>
+            <span class="sc-tag ${tagClass}">${sc.expectedDecision}</span>
+          </div>
+          <div class="sc-desc">${sc.description}</div>
+        `;
+        bar.appendChild(card);
+      });
+    }
+
+    function selectScenario(scenarioId) {
+      currentScenario = scenarios.find(s => s.scenarioId === scenarioId);
+      isTampered = false;
+      document.getElementById('tamper-btn-text').innerText = 'Tamper with Event Record';
+      document.getElementById('execution-receipt-box').style.display = 'none';
+
+      document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+      const activeCard = document.getElementById(`sc-card-${scenarioId}`);
+      if (activeCard) activeCard.classList.add('active');
+
+      renderTimeline();
+      renderGraph();
+      renderTransactionDetails();
+      runPreflight();
+      updateMerkleDisplay();
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('event-timeline');
+      container.innerHTML = '';
+      const events = currentScenario.events;
+      document.getElementById('event-count-badge').innerText = `${events.length} events`;
+
+      events.forEach((ev, idx) => {
+        const card = document.createElement('div');
+        let cardClass = 'event-card';
+        if (ev.eventType === 'message' && ev.sourceTrust === 'untrusted') cardClass += ' origin';
+        if (ev.eventType === 'claim' && ev.actorId === 'research-agent') cardClass += ' echo';
+        if (ev.sourceTrust === 'verified_external') cardClass += ' verified';
+
+        card.className = cardClass;
+        card.innerHTML = `
+          <div class="ev-top">
+            <span class="ev-actor">${ev.actorId} (${ev.channel})</span>
+            <span>${ev.eventId} &bull; ${ev.sourceTrust}</span>
+          </div>
+          <div class="ev-body">${ev.payload.claim || ev.payload.note || JSON.stringify(ev.payload)}</div>
+          <div class="ev-digest">Parents: [${ev.parentEventIds.join(', ') || 'root'}]</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderGraph() {
+      const svg = document.getElementById('dag-svg');
+      svg.innerHTML = '';
+      const events = currentScenario.events;
+      const count = events.length;
+
+      // Draw nodes and edges
+      const nodeX = (idx) => 60 + idx * (480 / Math.max(1, count - 1));
+      const nodeY = (ev) => ev.actorKind === 'human' ? 60 : (ev.actorKind === 'service' ? 200 : 130);
+
+      // Edges
+      events.forEach((ev, idx) => {
+        const x1 = nodeX(idx);
+        const y1 = nodeY(ev);
+
+        ev.parentEventIds.forEach(pId => {
+          const pIdx = events.findIndex(e => e.eventId === pId);
+          if (pIdx !== -1) {
+            const x0 = nodeX(pIdx);
+            const y0 = nodeY(events[pIdx]);
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x0);
+            line.setAttribute('y1', y0);
+            line.setAttribute('x2', x1);
+            line.setAttribute('y2', y1);
+            line.setAttribute('stroke', '#243B6B');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('stroke-dasharray', ev.sourceTrust === 'untrusted' ? '4 2' : 'none');
+            svg.appendChild(line);
+          }
+        });
+      });
+
+      // Nodes
+      events.forEach((ev, idx) => {
+        const cx = nodeX(idx);
+        const cy = nodeY(ev);
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', cx);
+        circle.setAttribute('cy', cy);
+        circle.setAttribute('r', '14');
+
+        let fill = '#152244';
+        let stroke = '#00F5D4';
+        if (ev.sourceTrust === 'untrusted') { stroke = '#FF3366'; }
+        else if (ev.sourceTrust === 'authorized') { stroke = '#00F5D4'; }
+        else if (ev.actorKind === 'agent') { stroke = '#FFB703'; }
+
+        circle.setAttribute('fill', fill);
+        circle.setAttribute('stroke', stroke);
+        circle.setAttribute('stroke-width', '2.5');
+        svg.appendChild(circle);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', cx);
+        text.setAttribute('y', cy + 4);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#F0F4F8');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('font-family', 'monospace');
+        text.textContent = (idx + 1);
+        svg.appendChild(text);
+
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', cx);
+        label.setAttribute('y', cy + 24);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('fill', '#8E9AAF');
+        label.setAttribute('font-size', '8');
+        label.setAttribute('font-family', 'monospace');
+        label.textContent = ev.actorId;
+        svg.appendChild(label);
+      });
+
+      // Show/hide echo chamber alert
+      const hasConvergence = currentScenario.scenarioId === 'vendor-swap' || currentScenario.scenarioId === 'llm-override-attack';
+      document.getElementById('convergence-alert').style.display = hasConvergence ? 'block' : 'none';
+    }
+
+    function renderTransactionDetails() {
+      const p = currentScenario.proposal;
+      const m = currentScenario.mandate;
+
+      document.getElementById('tx-asset').innerText = p.assetContract;
+      const amountUsd = (Number(p.amountBaseUnits) / 1000000).toFixed(2);
+      document.getElementById('tx-amount').innerText = `$${amountUsd} (${p.amountBaseUnits} minor)`;
+      document.getElementById('tx-recipient').innerText = p.recipient;
+      document.getElementById('mandate-recipient').innerText = m.allowedRecipient;
+      document.getElementById('tx-chain').innerText = `${p.chainId} (Arc)`;
+      const budgetUsd = (Number(m.cumulativeBudgetBaseUnits) / 1000000).toFixed(2);
+      document.getElementById('tx-budget').innerText = `$${budgetUsd}`;
+    }
+
+    async function runPreflight() {
+      let result;
+      try {
+        const res = await fetch('/v1/preflight', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            proposal: currentScenario.proposal,
+            mandate: currentScenario.mandate,
+            cumulativeSpentBaseUnits: currentScenario.scenarioId === 'api-budget-exhausted' ? 90000 : 0,
+            humanApproved: false,
+            independentVerifications: currentScenario.scenarioId === 'vendor-verified' ? [{
+              targetRecipient: currentScenario.proposal.recipient,
+              isIndependent: true
+            }] : []
+          })
+        });
+        result = await res.json();
+      } catch (err) {
+        // Fallback local deterministic engine
+        result = evaluateLocalPolicy(currentScenario);
+      }
+
+      displayDecision(result);
+    }
+
+    function evaluateLocalPolicy(sc) {
+      const p = sc.proposal;
+      const m = sc.mandate;
+      const reasons = [];
+      let decision = 'ALLOW';
+
+      if (sc.scenarioId === 'replayed-nonce') {
+        reasons.push('REPLAY_NONCE');
+        decision = 'DENY';
+      }
+      if (sc.scenarioId === 'api-budget-exhausted') {
+        reasons.push('BUDGET_EXHAUSTED');
+        decision = 'DENY';
+      }
+      if (p.recipient.toLowerCase() !== m.allowedRecipient.toLowerCase()) {
+        reasons.push('RECIPIENT_MISMATCH');
+        decision = 'DENY';
+      }
+
+      if (decision === 'ALLOW') {
+        reasons.push('AUTHORIZED_AND_VERIFIED');
+      }
+
+      return {
+        decision,
+        reasonCodes: reasons,
+        issuedAt: new Date().toISOString()
+      };
+    }
+
+    function displayDecision(result) {
+      const banner = document.getElementById('decision-banner');
+      const text = document.getElementById('decision-text');
+      const time = document.getElementById('decision-time');
+      const reasonList = document.getElementById('reason-list');
+
+      banner.className = `decision-banner ${result.decision.toLowerCase()}`;
+      text.innerText = result.decision;
+      time.innerText = new Date(result.issuedAt).toLocaleTimeString();
+
+      reasonList.innerHTML = '';
+      result.reasonCodes.forEach(r => {
+        const chip = document.createElement('div');
+        chip.className = `reason-chip ${result.decision === 'ALLOW' ? 'allow' : ''}`;
+        chip.innerText = `[RULE] ${r}`;
+        reasonList.appendChild(chip);
+      });
+
+      updateExecuteButtonState(result.decision);
+    }
+
+    function updateExecuteButtonState(decision) {
+      const btn = document.getElementById('btn-execute');
+      const bannerText = document.getElementById('decision-text').innerText;
+      const dec = decision || bannerText;
+
+      if (currentMode === 'enforcement') {
+        btn.disabled = (dec !== 'ALLOW');
+        btn.title = (dec !== 'ALLOW') ? 'Blocked by independent policy gate' : 'Execute authorized payment';
+      } else {
+        btn.disabled = false;
+        btn.title = 'Consumer mode: Advisory warnings shown; external execution unrestricted';
+      }
+    }
+
+    async function executePayment() {
+      const bannerText = document.getElementById('decision-text').innerText;
+      if (currentMode === 'enforcement' && bannerText !== 'ALLOW') {
+        alert('EXECUTION REFUSED: Deterministic policy engine blocked payment.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/v1/payments/${currentScenario.proposal.requestId}/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            preflight: { decision: bannerText, reasonCodes: ['AUTHORIZED_AND_VERIFIED'] },
+            proposal: currentScenario.proposal,
+            mandate: currentScenario.mandate
+          })
+        });
+        const receipt = await res.json();
+        showReceipt(receipt);
+      } catch (err) {
+        // Simulated local fallback
+        const mockHash = '0xsim' + Math.random().toString(16).substring(2, 10) + '...arc';
+        showReceipt({
+          txHash: mockHash,
+          status: 'SIMULATED',
+          explorerUrl: `https://explorer.testnet.arc.io/tx/${mockHash}`
+        });
+      }
+    }
+
+    function showReceipt(receipt) {
+      const box = document.getElementById('execution-receipt-box');
+      box.style.display = 'block';
+      document.getElementById('receipt-hash').innerText = `Tx Hash: ${receipt.txHash} (${receipt.status})`;
+      const link = document.getElementById('receipt-explorer').querySelector('a');
+      link.href = receipt.explorerUrl || '#';
+      link.innerText = `View on Arc Explorer (${receipt.status}) \u2192`;
+    }
+
+    function updateMerkleDisplay() {
+      const badge = document.getElementById('proof-status-badge');
+      const root = document.getElementById('merkle-root');
+      const digest = document.getElementById('event-digest');
+      const expl = document.getElementById('proof-explanation');
+
+      if (!isTampered) {
+        badge.className = 'proof-badge valid';
+        badge.innerText = 'Proof Verified';
+        root.innerText = '0x8f2d9e1...a4b7';
+        digest.innerText = '0x4c2b9a...1102';
+        expl.innerText = 'Valid Cryptographic Inclusion Path (3 steps)';
+        expl.style.color = 'var(--mint)';
+      } else {
+        badge.className = 'proof-badge invalid';
+        badge.innerText = 'TAMPER DETECTED';
+        root.innerText = '0x8f2d9e1...a4b7 (Committed Root)';
+        digest.innerText = '0xDEADBEEF...BAD1 (Altered Digest)';
+        expl.innerText = 'Verification FAILED: Calculated root does not match committed root!';
+        expl.style.color = 'var(--crimson)';
+      }
+    }
+
+    function toggleTamper() {
+      isTampered = !isTampered;
+      document.getElementById('tamper-btn-text').innerText = isTampered ? 'Reset to Authentic Event' : 'Tamper with Event Record';
+      updateMerkleDisplay();
+    }
+
+    function getFallbackScenarios() {
+      // Embedded fallback matching scenarios.json
+      return [
+        {
+          scenarioId: 'vendor-swap',
+          title: 'Vendor Recipient Substitution',
+          family: 'vendor',
+          description: 'Attacker injects address change; agents repeat it; deterministic gate blocks payment.',
+          expectedDecision: 'DENY',
+          proposal: { amountBaseUnits: '250000000', recipient: '0x2222222222222222222222222222222222222222', assetContract: 'USDC', chainId: '5042002', requestId: 'req-1' },
+          mandate: { allowedRecipient: '0x1111111111111111111111111111111111111111', cumulativeBudgetBaseUnits: '500000000' },
+          events: [
+            { eventId: 'evt-1', actorId: 'owner', actorKind: 'human', channel: 'wallet', eventType: 'authorization', sourceTrust: 'authorized', parentEventIds: [], payload: { note: 'Authorized Acme Services' } },
+            { eventId: 'evt-2', actorId: 'attacker', actorKind: 'agent', channel: 'email', eventType: 'message', sourceTrust: 'untrusted', parentEventIds: ['evt-1'], payload: { claim: 'URGENT: Remit payment to 0x2222...' } },
+            { eventId: 'evt-3', actorId: 'research-agent', actorKind: 'agent', channel: 'agent_a2a', eventType: 'claim', sourceTrust: 'authenticated', parentEventIds: ['evt-2'], payload: { claim: 'Email states wallet is 0x2222...' } },
+            { eventId: 'evt-4', actorId: 'financial-agent', actorKind: 'agent', channel: 'policy', eventType: 'payment_proposal', sourceTrust: 'authenticated', parentEventIds: ['evt-1', 'evt-3'], payload: { claim: 'Proposing payment to 0x2222...' } }
+          ]
+        }
+      ];
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

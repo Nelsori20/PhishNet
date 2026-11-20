@@ -1,0 +1,25 @@
+{
+  "name": "phishnet",
+  "version": "1.0.0",
+  "description": "Provenance-aware security platform for human-AI and agent-to-agent financial interactions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node apps/api/src/server.js",
+    "test": "node tests/run-all.js",
+    "test:native": "powershell -ExecutionPolicy Bypass -File tests/run-tests.ps1",
+    "serve": "powershell -ExecutionPolicy Bypass -File apps/api/serve.ps1"
+  },
+  "keywords": [
+    "agentic-payments",
+    "security",
+    "provenance",
+    "merkle-proof",
+    "arc-testnet",
+    "usdc",
+    "social-engineering",
+    "financial-authorization"
+  ],
+  "author": "PhishNet Team",
+  "license": "Apache-2.0"
+}

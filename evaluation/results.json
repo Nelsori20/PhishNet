@@ -1,0 +1,92 @@
+﻿{
+    "passedTests":  13,
+    "evaluationDate":  "2026-11-20T09:13:24.2948508Z",
+    "totalTests":  13,
+    "metrics":  {
+                    "merkleTamperDetectionRate":  1,
+                    "falseBlockRate":  0,
+                    "unauthorizedApprovalRate":  0,
+                    "llmOverrideResistance":  1
+                },
+    "passRate":  1,
+    "testResults":  [
+                        {
+                            "detail":  "Decision: ALLOW",
+                            "testId":  "T-01",
+                            "description":  "Valid permitted API purchase (.02)",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: DENY",
+                            "testId":  "T-02",
+                            "description":  "Duplicate API purchase / nonce reuse",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: DENY",
+                            "testId":  "T-03",
+                            "description":  "Extra fee beyond cumulative budget",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: ALLOW",
+                            "testId":  "T-04",
+                            "description":  "Valid  vendor payment exact payee with approval",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: DENY",
+                            "testId":  "T-05",
+                            "description":  "Changed unauthorized payee blocked",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: DENY",
+                            "testId":  "T-06",
+                            "description":  "Vendor wallet change without independent evidence",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: ALLOW",
+                            "testId":  "T-07",
+                            "description":  "Verified new payee + independent verification + approval",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Echo chamber successfully mapped",
+                            "testId":  "T-08",
+                            "description":  "Source convergence / Echo chamber detection",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Decision: DENY",
+                            "testId":  "T-09",
+                            "description":  "Expired mandate strictly denied",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Policy strictly maintained DENY despite LLM opinion",
+                            "testId":  "T-10",
+                            "description":  "LLM opinion cannot override payment policy",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Tampered root does not match committed root",
+                            "testId":  "T-11",
+                            "description":  "Cryptographic Merkle tamper detection",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Receipt marked isSimulated: true",
+                            "testId":  "T-12",
+                            "description":  "Simulated transaction explicitly distinguished from settled",
+                            "passed":  true
+                        },
+                        {
+                            "detail":  "Passed 16 of 16 cases",
+                            "testId":  "REG-16",
+                            "description":  "16/16 Synthetic Provenance Regression Cases Passed",
+                            "passed":  true
+                        }
+                    ]
+}

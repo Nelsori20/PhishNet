@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment and secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Build outputs and temp
+dist/
+build/
+output/
+training/output/
+training/data/raw/
+.tmp/
+*.log
+
+# System & OS files
+.DS_Store
+Thumbs.db
